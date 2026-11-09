@@ -104,6 +104,12 @@ textarea.in{resize:vertical;min-height:84px}
 .linkrow .btn{min-height:46px;font-size:15px;padding-inline:14px}
 #qr{display:grid;place-items:center;background:#fff;color:#12262B;font-size:14px;text-align:center;border-radius:14px;padding:14px;width:fit-content;min-width:120px;max-width:100%;margin:0 auto}
 #qr img,#qr canvas{display:block;max-width:100%;height:auto}
+/* 제목 영역: 감귤 철 제주 아침. 배경은 어느 테마에서도 같은 그림이라 글자색을 직접 지정해요. */
+.hero{position:relative;isolation:isolate;overflow:hidden;border-radius:22px;aspect-ratio:5/3;min-height:200px;background:#127A82;color:#fff}
+.hero .bg{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:-1}
+.hero h1{margin:0;padding:clamp(18px,6vw,30px) 14px 0;font-size:clamp(24px,7.4vw,36px);line-height:1.22;text-shadow:0 2px 0 rgba(0,40,45,.35)}
+.hero h1 span{display:block}
+.hero h1 i{font-style:normal;color:#FFC46B}
 #guestView{display:grid;gap:16px;min-width:0}
 #lock{gap:14px}
 .pin{width:100%;text-align:center;letter-spacing:.7em;padding:12px 0 12px .7em;font-size:30px;font-weight:700;border:2px solid var(--line);border-radius:14px;background:var(--bg)}
@@ -202,7 +208,78 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
   </section>
 
   <div id="guestView">
-  <h1 id="title"></h1>
+  <header class="hero">
+    <svg class="bg" viewBox="0 0 500 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#0A5963"/>
+          <stop offset=".42" stop-color="#127A82"/>
+          <stop offset=".6" stop-color="#E9A862"/>
+          <stop offset=".68" stop-color="#F4C48A"/>
+          <stop offset="1" stop-color="#F7CE93"/>
+        </linearGradient>
+        <linearGradient id="hSea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2FA3A8"/>
+          <stop offset="1" stop-color="#0D6872"/>
+        </linearGradient>
+        <radialGradient id="hGlow" cx=".5" cy=".5" r=".5">
+          <stop offset="0" stop-color="#FFD08A" stop-opacity=".95"/>
+          <stop offset="1" stop-color="#FFD08A" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="hTan" cx=".38" cy=".32" r=".75">
+          <stop offset="0" stop-color="#FFC15C"/>
+          <stop offset=".55" stop-color="#F28A0F"/>
+          <stop offset="1" stop-color="#D86A00"/>
+        </radialGradient>
+        <pattern id="hStone" width="90" height="30" patternUnits="userSpaceOnUse">
+          <rect x="1" y="1" width="40" height="13" rx="5" fill="#3A4B52"/>
+          <rect x="44" y="1" width="45" height="13" rx="5" fill="#4A5D65"/>
+          <rect x="23" y="16" width="42" height="13" rx="5" fill="#4A5D65"/>
+          <rect x="68" y="16" width="21" height="13" rx="5" fill="#3A4B52"/>
+          <rect x="0" y="16" width="20" height="13" rx="5" fill="#3A4B52"/>
+        </pattern>
+        <g id="hTg">
+          <circle r="20" fill="url(#hTan)"/>
+          <ellipse cx="-7" cy="-8" rx="6" ry="3.5" transform="rotate(-30 -7 -8)" fill="#fff" opacity=".35"/>
+          <path d="M0 -19 C4 -30 16 -30 20 -24 C14 -20 6 -17 0 -19Z" fill="#3FA34D"/>
+          <circle cx="0" cy="-19" r="3" fill="#2F8A3A"/>
+        </g>
+        <g id="hRn" fill="none" stroke="#FFF3D6" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="15" cy="4" r="3" fill="#FFF3D6"/>
+          <path d="M13 8 L10 17"/>
+          <path d="M13 9 L18 13 L21 11"/>
+          <path d="M13 9 L8 11 L6 15"/>
+          <path d="M10 17 L15 20 L14 27"/>
+          <path d="M10 17 L6 22 L2 21"/>
+        </g>
+      </defs>
+      <rect width="500" height="300" fill="url(#hSky)"/>
+      <circle cx="392" cy="196" r="110" fill="url(#hGlow)"/>
+      <circle cx="392" cy="196" r="40" fill="#F28A1B"/>
+      <rect y="204" width="500" height="96" fill="url(#hSea)"/>
+      <g fill="#FFD9A0" opacity=".55">
+        <rect x="362" y="212" width="60" height="3" rx="1.5"/>
+        <rect x="370" y="222" width="44" height="3" rx="1.5"/>
+        <rect x="378" y="233" width="28" height="3" rx="1.5"/>
+      </g>
+      <path d="M-20 238 C30 222 74 186 120 168 C142 160 176 160 198 168 C244 186 290 222 346 238 L346 300 L-20 300Z" fill="#1C5A3A"/>
+      <ellipse cx="159" cy="164" rx="17" ry="3" fill="#5FB6B0" opacity=".9"/>
+      <path d="M250 250 C330 232 420 236 510 246 L510 300 L250 300Z" fill="#26704A"/>
+      <path d="M-10 256 C110 242 250 240 360 248 C430 253 480 250 510 246 L510 300 L-10 300Z" fill="#2F8A52"/>
+      <use href="#hRn" transform="translate(168 226)"/>
+      <use href="#hRn" transform="translate(208 229) scale(.9)"/>
+      <use href="#hRn" transform="translate(246 223) scale(1.1)"/>
+      <rect y="270" width="500" height="30" fill="#1F2B30"/>
+      <rect y="270" width="500" height="30" fill="url(#hStone)"/>
+      <use href="#hTg" transform="translate(58 254)"/>
+      <use href="#hTg" transform="translate(98 259) scale(.75)"/>
+      <use href="#hTg" transform="translate(132 263) scale(.55)"/>
+      <use href="#hTg" transform="translate(442 253) scale(1.05)"/>
+      <use href="#hTg" transform="translate(400 258) scale(.8)"/>
+      <use href="#hTg" transform="translate(366 262) scale(.6)"/>
+    </svg>
+    <h1 id="title"></h1>
+  </header>
 
   <section class="card" aria-labelledby="hTags">
     <h2 id="hTags">지정해시태그</h2>
@@ -237,7 +314,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
 
   /* 기본값: 주소에 설정이 없을 때 보이는 내용이에요. 행사에 맞게 여기만 바꿔도 돼요. */
   var DEFAULTS = {
-    title: '지정해시태그 및 팔로우',
+    title: '2026 제주감귤마라톤 X 제주시농협',
     tags: ['제주시농협', 'AI러닝부스', '제주마라톤', '완주인증'],
     ig: 'https://www.instagram.com/your_account/'
   };
@@ -307,6 +384,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
         var d = JSON.parse(raw);
         if (d && Array.isArray(d.tags)) {
           cfg.title = String(d.title || DEFAULTS.title).slice(0, 30);
+          if (cfg.title === '지정해시태그 및 팔로우') cfg.title = DEFAULTS.title;   // 예전 기본 제목은 새 제목으로
           cfg.tags = parseTags(d.tags.join(' '));
           cfg.ig = cleanIg(d.ig);
         }
@@ -318,8 +396,20 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
 
   /* 참가자 화면 */
   var copyText = '';
+  // "행사 X 기관" 모양이면 두 줄로 나눠서 보여줘요
+  function renderTitle(t) {
+    var h = $('title');
+    h.textContent = '';
+    var m = /^(.*?)\s+[xX×]\s+(.+)$/.exec(t);
+    if (!m) { h.textContent = t; return; }
+    var a = document.createElement('span'); a.textContent = m[1];
+    var b = document.createElement('span');
+    var x = document.createElement('i'); x.textContent = 'X';
+    b.appendChild(x); b.appendChild(document.createTextNode(' ' + m[2]));
+    h.appendChild(a); h.appendChild(b);
+  }
   function render() {
-    $('title').textContent = cfg.title || DEFAULTS.title;
+    renderTitle(cfg.title || DEFAULTS.title);
 
     var ul = $('tagList');
     ul.textContent = '';
