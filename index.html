@@ -1,50 +1,59 @@
-<title>해시태그 빠른 복사</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>제주시농협 해시태그 빠른 복사</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="제주시농협 해시태그 빠른 복사">
+<meta property="og:description" content="지정 해시태그를 한 번에 복사하고 인스타그램으로 이동하세요.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="fonts/GmarketSansBold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 @font-face{font-family:"GmarketSans";src:url("fonts/GmarketSansBold.woff2") format("woff2");font-weight:400 700;font-style:normal;font-display:swap}
 :root{
-  /* 레이아웃: 한 줄 세로 단. 위에서 아래로 해시태그 → 인스타그램, 복사 버튼은 하단에 고정. 담당자 설정은 #admin 일 때만 위쪽에 열림. */
+  /* 레이아웃: 한 줄 세로 단. 해시태그 카드(안내 문구 바로 아래에 복사 버튼) → 인스타그램 카드. 관리자 설정은 관리자 주소에서만 위쪽에 열림. */
   --display:"GmarketSans","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   /* 팔레트: 러닝 리듬 탭과 같은 부스 색 (바다 안개, 청록, 감귤) */
   --bg:#EAF1EF; --surface:#F6FAF8; --ink:#12262B; --ink-2:#46606A; --line:#C3D3D0;
   --left:#0B7A86; --left-soft:#CFE8EA; --on-left:#FFFFFF; --left-ink:#08626C;
-  --right:#E8830C; --on-right:#1B1200; --bad:#B3402F;
+  --right:#E8830C; --on-right:#1B1200; --warn:#8A4700; --bad:#B3402F;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
     --bg:#0E1A1E; --surface:#162429; --ink:#E6EFEE; --ink-2:#9DB4B8; --line:#2A3D43;
     --left:#3CC0CC; --left-soft:#123A40; --on-left:#04242A; --left-ink:#3CC0CC;
-    --right:#F5A03B; --on-right:#1E1200; --bad:#FF8A78;
+    --right:#F5A03B; --on-right:#1E1200; --warn:#F5A03B; --bad:#FF8A78;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#0E1A1E; --surface:#162429; --ink:#E6EFEE; --ink-2:#9DB4B8; --line:#2A3D43;
   --left:#3CC0CC; --left-soft:#123A40; --on-left:#04242A; --left-ink:#3CC0CC;
-  --right:#F5A03B; --on-right:#1E1200; --bad:#FF8A78;
+  --right:#F5A03B; --on-right:#1E1200; --warn:#F5A03B; --bad:#FF8A78;
   color-scheme:dark;
 }
 
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{
   margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
   padding-left:max(16px,env(safe-area-inset-left,0px));
   padding-right:max(16px,env(safe-area-inset-right,0px));
-  padding-block:20px 140px;
+  padding-block:20px 40px;
   -webkit-tap-highlight-color:transparent;
 }
 button,input,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
-.wrap{max-width:480px;margin:0 auto;display:grid;gap:16px}
+.wrap{width:100%;max-width:480px;margin:0 auto;display:grid;gap:16px}
+.wrap>*{min-width:0}
 h1,h2{margin:0;font-weight:400}
-h1{font-family:var(--display);font-size:clamp(30px,8.5vw,40px);line-height:1.2;text-align:center;text-wrap:balance;padding-block:8px 6px}
+h1{font-family:var(--display);font-size:clamp(28px,8.5vw,40px);line-height:1.25;text-align:center;text-wrap:balance;padding-block:8px 6px;overflow-wrap:anywhere}
 h2{font-size:15px;font-weight:700;color:var(--ink-2)}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:14px;min-width:0}
 
@@ -52,53 +61,84 @@ h2{font-size:15px;font-weight:700;color:var(--ink-2)}
 .tags li{background:var(--left-soft);color:var(--left-ink);font-weight:700;font-size:19px;line-height:1.3;padding:7px 15px;border-radius:999px;overflow-wrap:anywhere}
 .tags .none{background:transparent;color:var(--ink-2);font-weight:400;font-size:15px;padding:0}
 .hint{margin:0;font-size:14px;color:var(--ink-2)}
+#copyNote{margin:0;font-size:14px;color:var(--ink-2);text-align:center}
+#copyNote:empty{display:none}
 #fallback{width:100%;border:2px solid var(--ink);border-radius:12px;padding:12px;background:var(--bg);font-size:17px;resize:none}
 
-.handle{margin:0;font-family:var(--display);font-size:26px;line-height:1.2;overflow-wrap:anywhere}
+.copy{
+  display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:60px;border:0;border-radius:16px;
+  background:var(--right);color:var(--on-right);font-family:var(--display);font-size:clamp(21px,6vw,25px);line-height:1.1;cursor:pointer;padding:10px 14px;
+}
+.copy:active{transform:translateY(1px)}
+.copy:disabled{opacity:.5;cursor:default}
+.copy svg{width:26px;height:26px;flex:none}
+.copy.done{background:var(--ink);color:var(--bg)}
+
+.handle{margin:0;font-family:var(--display);font-size:clamp(22px,6.5vw,28px);line-height:1.2;overflow-wrap:anywhere}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:14px;border:2px solid var(--ink);background:transparent;color:var(--ink);font-weight:700;font-size:17px;text-decoration:none;cursor:pointer;padding:10px 18px}
 .btn.next{background:var(--left);border-color:var(--left);color:var(--on-left)}
 .btn svg{width:18px;height:18px;flex:none}
 .foot{margin:0;text-align:center;font-size:13px}
 .foot a{color:var(--ink-2);text-underline-offset:3px}
 
-.dock{
-  position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--bg);border-top:1px solid var(--line);
-  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
-}
-.dock-in{max-width:480px;margin:0 auto;display:grid;gap:6px}
-.copy{
-  display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:62px;border:0;border-radius:16px;
-  background:var(--right);color:var(--on-right);font-family:var(--display);font-size:25px;line-height:1.1;cursor:pointer;
-}
-.copy:active{transform:translateY(1px)}
-.copy svg{width:26px;height:26px;flex:none}
-.copy.done{background:var(--ink);color:var(--bg)}
-#dockNote{margin:0;min-height:22px;text-align:center;font-size:14px;color:var(--ink-2)}
-
-/* 담당자 설정 */
-#admin{display:grid;gap:16px}
-#admin[hidden]{display:none}
+/* 관리자 */
+#admin{display:grid;gap:16px;min-width:0}
 .field{display:grid;gap:6px}
 .field label{font-size:14px;font-weight:700}
 .field .help{font-size:12px;color:var(--ink-2)}
-.field .err{font-size:12px;color:var(--bad);min-height:0}
-input[type=text],input[type=url],textarea.in{width:100%;border:2px solid var(--line);border-radius:12px;background:var(--bg);padding:11px 13px;font-size:16px}
-input[type=text]:focus-visible,input[type=url]:focus-visible,textarea.in:focus-visible{border-color:var(--ink);outline:none}
+.field .err{font-size:12px;color:var(--bad)}
+.field .err:empty{display:none}
+input[type=text],textarea.in{width:100%;border:2px solid var(--line);border-radius:12px;background:var(--bg);padding:11px 13px;font-size:16px}
+input[type=text]:focus-visible,textarea.in:focus-visible{border-color:var(--ink);outline:none}
 textarea.in{resize:vertical;min-height:84px}
 .note{margin:0;font-size:13px;color:var(--ink-2);padding:10px 12px;border-left:4px solid var(--right);background:var(--bg)}
+.saverow{display:grid;gap:8px}
+.btn.save{background:var(--right);border-color:var(--right);color:var(--on-right);font-size:18px}
+.btn.save.idle{background:transparent;border-color:var(--ink);color:var(--ink)}
+.savestate{margin:0;font-size:13px;color:var(--ink-2)}
+.savestate[data-s="dirty"]{color:var(--warn);font-weight:700}
+.savestate[data-s="saved"]{color:var(--left-ink);font-weight:700}
+.savestate[data-s="error"]{color:var(--bad);font-weight:700}
 .linkrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
 .linkrow .btn{min-height:46px;font-size:15px;padding-inline:14px}
-#qr{display:grid;place-items:center;background:#fff;border-radius:14px;padding:14px;width:fit-content;max-width:100%;margin:0 auto}
+#qr{display:grid;place-items:center;background:#fff;color:#12262B;font-size:14px;text-align:center;border-radius:14px;padding:14px;width:fit-content;min-width:120px;max-width:100%;margin:0 auto}
 #qr img,#qr canvas{display:block;max-width:100%;height:auto}
+#guestView{display:grid;gap:16px;min-width:0}
+#lock{gap:14px}
+.pin{width:100%;text-align:center;letter-spacing:.7em;padding:12px 0 12px .7em;font-size:30px;font-weight:700;border:2px solid var(--line);border-radius:14px;background:var(--bg)}
+.pin:focus-visible{border-color:var(--ink);outline:none}
+.pin:disabled{opacity:.5}
+.pin.sm{font-size:22px;padding-block:9px}
+#lockMsg{margin:0;font-size:14px;font-weight:700;color:var(--bad);text-align:center}
+#lockMsg:empty{display:none}
+.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2);padding-block:4px}
+.pinform{display:grid;gap:14px;margin-top:12px}
+#pinCard{gap:8px}
+.textbtn{justify-self:start;border:0;background:transparent;color:var(--ink-2);font-size:13px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 0}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
 .divider{margin:4px 0 0;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2)}
 .divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
 </style>
 
+</head>
+<body>
 <main class="wrap">
+  <section id="lock" class="card" hidden aria-labelledby="lockTitle">
+    <h2 id="lockTitle">관리자 비밀번호</h2>
+    <p class="hint">숫자 4자리를 입력하세요.</p>
+    <form id="lockForm" autocomplete="off">
+      <input id="pinInput" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" aria-label="비밀번호 4자리">
+      <button id="btnUnlock" class="btn save" type="submit" style="width:100%;margin-top:12px">들어가기</button>
+    </form>
+    <p id="lockMsg" role="alert"></p>
+  </section>
+
   <section id="admin" hidden aria-labelledby="adminTitle">
     <div class="card">
       <h2 id="adminTitle">행사 담당자 설정</h2>
-      <p class="note">지금 들어 있는 해시태그와 계정은 예시예요. 행사에 맞게 바꾸면 아래 링크와 QR이 함께 바뀌어요.</p>
+      <p class="note">지금 들어 있는 해시태그와 계정은 예시예요. 행사에 맞게 바꾸고 <b>설정 저장</b>을 누르면 아래 링크와 QR이 새 설정으로 바뀌어요.</p>
       <div class="field">
         <label for="fTitle">화면 제목</label>
         <input id="fTitle" type="text" maxlength="30">
@@ -113,25 +153,66 @@ textarea.in{resize:vertical;min-height:84px}
         <input id="fIg" type="text" inputmode="url" autocapitalize="off" autocomplete="off" placeholder="https://www.instagram.com/아이디/">
         <span class="err" id="igErr" role="alert"></span>
       </div>
+      <div class="saverow">
+        <button id="btnSave" class="btn save" type="button">설정 저장</button>
+        <p id="saveState" class="savestate" role="status" aria-live="polite" data-s="clean"></p>
+      </div>
     </div>
     <div class="card">
       <h2>참가자용 링크와 QR</h2>
+      <p class="hint">마지막으로 저장한 설정 기준이에요. 설정을 바꾸면 이 링크와 QR을 새로 배포해 주세요.</p>
       <div class="linkrow">
         <input id="outLink" type="text" readonly aria-label="참가자용 링크">
         <button id="btnCopyLink" class="btn" type="button">링크 복사</button>
       </div>
       <div id="qr" aria-label="참가자용 QR 코드"></div>
-      <p class="hint">QR은 화면을 캡처해서 현수막이나 배너에 넣으세요. 이 파일을 GitHub Pages에 올린 주소로 접속해야 링크가 그대로 동작해요.</p>
+      <p class="hint">QR은 화면을 캡처해서 현수막이나 배너에 넣으세요.</p>
+    </div>
+    <div class="card" id="pinCard">
+      <details id="pinBox">
+        <summary>비밀번호 변경</summary>
+        <div class="pinform">
+          <div class="field" id="curWrap">
+            <label for="pinCur">현재 비밀번호</label>
+            <input id="pinCur" class="pin sm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="pinNew">새 비밀번호 (숫자 4자리)</label>
+            <input id="pinNew" class="pin sm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="pinNew2">새 비밀번호 확인</label>
+            <input id="pinNew2" class="pin sm" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off">
+          </div>
+          <button id="btnPinChange" class="btn save" type="button">비밀번호 변경</button>
+          <p id="pinState" class="savestate" role="status" aria-live="polite" data-s="clean"></p>
+          <div id="pinShare" hidden>
+            <p class="hint">바꾼 비밀번호는 지금 쓰는 기기에만 적용돼요. 다른 기기에서도 이 비밀번호로 들어가려면 admin.html과 index.html의 <b>PIN_HASH</b> 값을 아래 값으로 바꿔서 다시 올려 주세요.</p>
+            <div class="linkrow">
+              <input id="pinHashOut" type="text" readonly aria-label="다른 기기용 비밀번호 값">
+              <button id="btnCopyHash" class="btn" type="button">값 복사</button>
+            </div>
+          </div>
+        </div>
+      </details>
+      <button id="btnLock" class="textbtn" type="button">관리자 화면 잠그기</button>
     </div>
     <div class="divider">참가자에게 보이는 화면</div>
   </section>
 
+  <div id="guestView">
   <h1 id="title"></h1>
 
   <section class="card" aria-labelledby="hTags">
     <h2 id="hTags">지정해시태그</h2>
     <ul class="tags" id="tagList"></ul>
     <p class="hint">아래 버튼으로 복사한 뒤, 인스타그램 게시물 문구에 붙여넣으세요.</p>
+    <button id="copyBtn" class="copy" type="button">
+      <svg id="icCopy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+      <svg id="icDone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+      <span id="copyLabel">해시태그 전체 복사</span>
+    </button>
+    <p id="copyNote" role="status" aria-live="polite"></p>
     <textarea id="fallback" readonly rows="3" hidden aria-label="복사할 해시태그"></textarea>
   </section>
 
@@ -144,30 +225,37 @@ textarea.in{resize:vertical;min-height:84px}
     </a>
     <p class="hint">계정을 팔로우하고, 복사한 해시태그를 게시물에 붙여넣어 올려주세요.</p>
   </section>
+  </div>
 
   <p class="foot" id="guestFoot" hidden><a href="#guest" id="guestLink">참가자 화면으로</a></p>
 </main>
-
-<div class="dock">
-  <div class="dock-in">
-    <button id="copyBtn" class="copy" type="button">
-      <svg id="icCopy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
-      <svg id="icDone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-      <span id="copyLabel">해시태그 전체 복사</span>
-    </button>
-    <p id="dockNote" role="status" aria-live="polite"></p>
-  </div>
-</div>
 
 <script>
 (function () {
   'use strict';
 
-  var DEFAULT_TITLE = '지정해시태그 및 팔로우';
+  /* 기본값: 주소에 설정이 없을 때 보이는 내용이에요. 행사에 맞게 여기만 바꿔도 돼요. */
+  var DEFAULTS = {
+    title: '지정해시태그 및 팔로우',
+    tags: ['제주시농협', 'AI러닝부스', '제주마라톤', '완주인증'],
+    ig: 'https://www.instagram.com/your_account/'
+  };
+  var TITLE_GUEST = '제주시농협 해시태그 빠른 복사';
+  var TITLE_ADMIN = '제주시농협 해시태그 빠른 복사(관리자)';
   var DRAFT_KEY = 'hashtag-quick-copy.draft.v1';
   var MAX_TAGS = 12;
 
+  /* 관리자 비밀번호(숫자 4자리)를 SHA-256으로 바꾼 값이에요. 비밀번호를 바꾸려면 관리자 화면의 '비밀번호 변경'에서 만든 값으로 교체하세요.
+     값을 빈 문자열('')로 두면 잠금 없이 열리고, 새 비밀번호를 만들라고 안내해요. 파일을 볼 수 있는 사람에게는 알아낼 수 있는 가벼운 잠금이에요. */
+  var PIN_HASH = '143ec65292b0ee7b51a95bcddc4768b09807c7d302f1a1bf6c7b114bb8a77765';
+  var PIN_SALT = 'jejusinonghyup-hashtag-admin:v1:';
+  var PIN_KEY = 'hashtag-quick-copy.pin.v1';
+  var UNLOCK_KEY = 'hashtag-quick-copy.unlocked.v1';
+  var FAIL_KEY = 'hashtag-quick-copy.fail.v1';
+
   var $ = function (id) { return document.getElementById(id); };
+  var forcedAdmin = document.documentElement.getAttribute('data-mode') === 'admin';
+  function isAdmin() { return forcedAdmin || window.location.hash === '#admin'; }
 
   /* 입력 정리 */
   function parseTags(s) {
@@ -178,7 +266,7 @@ textarea.in{resize:vertical;min-height:84px}
     });
     return out;
   }
-  // 인스타그램 주소만 허용 (링크로 만든 주소가 다른 사이트로 연결되지 않게)
+  // 인스타그램 주소만 허용 (링크가 다른 사이트로 연결되지 않게)
   function cleanIg(v) {
     v = String(v || '').trim();
     if (!v) return '';
@@ -200,13 +288,14 @@ textarea.in{resize:vertical;min-height:84px}
     } catch (e) { /* 무시 */ }
     return '';
   }
+  function clone(c) { return { title: c.title, tags: c.tags.slice(), ig: c.ig }; }
 
-  /* 설정 읽기: 주소의 값 → 이 기기의 임시 저장 → 예시 값 */
-  var cfg = { title: DEFAULT_TITLE, tags: ['제주시농협', 'AI러닝부스', '제주마라톤', '완주인증'], ig: 'https://www.instagram.com/your_account/' };
+  /* 설정 읽기: 주소의 값 → 이 기기에 저장한 설정 → 기본값 */
+  var cfg = clone(DEFAULTS);
   (function init() {
     var q = new URLSearchParams(window.location.search);
     if (q.has('tags') || q.has('ig') || q.has('title')) {
-      cfg.title = (q.get('title') || DEFAULT_TITLE).slice(0, 30);
+      cfg.title = (q.get('title') || DEFAULTS.title).slice(0, 30);
       cfg.tags = parseTags((q.get('tags') || '').replace(/,/g, ' '));
       cfg.ig = cleanIg(q.get('ig'));
       return;
@@ -216,19 +305,20 @@ textarea.in{resize:vertical;min-height:84px}
       if (raw) {
         var d = JSON.parse(raw);
         if (d && Array.isArray(d.tags)) {
-          cfg.title = String(d.title || DEFAULT_TITLE).slice(0, 30);
+          cfg.title = String(d.title || DEFAULTS.title).slice(0, 30);
           cfg.tags = parseTags(d.tags.join(' '));
           cfg.ig = cleanIg(d.ig);
         }
       }
-    } catch (e) { /* 저장소를 못 쓰면 예시 값 사용 */ }
+    } catch (e) { /* 저장소를 못 쓰면 기본값 사용 */ }
   })();
+  var saved = clone(cfg);          // 마지막으로 저장한 설정 (링크와 QR의 기준)
+  var justSaved = '';
 
-  /* 화면 그리기 */
+  /* 참가자 화면 */
   var copyText = '';
   function render() {
-    $('title').textContent = cfg.title || DEFAULT_TITLE;
-    document.title = '해시태그 빠른 복사';
+    $('title').textContent = cfg.title || DEFAULTS.title;
 
     var ul = $('tagList');
     ul.textContent = '';
@@ -242,15 +332,13 @@ textarea.in{resize:vertical;min-height:84px}
     }
     copyText = cfg.tags.map(function (t) { return '#' + t; }).join(' ');
     $('copyBtn').disabled = !cfg.tags.length;
-    $('copyBtn').style.opacity = cfg.tags.length ? '1' : '.5';
 
-    var igCard = $('igCard');
     if (cfg.ig) {
-      igCard.hidden = false;
+      $('igCard').hidden = false;
       $('handle').textContent = handleOf(cfg.ig) || 'instagram.com';
       $('igBtn').href = cfg.ig;
     } else {
-      igCard.hidden = true;
+      $('igCard').hidden = true;
     }
     resetCopyState();
   }
@@ -262,6 +350,8 @@ textarea.in{resize:vertical;min-height:84px}
     $('copyBtn').classList.remove('done');
     $('copyLabel').textContent = '해시태그 전체 복사';
     $('icCopy').hidden = false; $('icDone').hidden = true;
+    $('copyNote').textContent = '';
+    $('fallback').hidden = true;
     $('igBtn').classList.remove('next');
     $('igBtnText').textContent = '인스타그램 열기';
   }
@@ -269,11 +359,11 @@ textarea.in{resize:vertical;min-height:84px}
     $('copyBtn').classList.add('done');
     $('copyLabel').textContent = '복사 완료';
     $('icCopy').hidden = true; $('icDone').hidden = false;
-    $('dockNote').textContent = '인스타그램을 열어 게시물 문구에 붙여넣으세요.';
+    $('copyNote').textContent = '인스타그램을 열어 게시물 문구에 붙여넣으세요.';
     $('fallback').hidden = true;
     if (cfg.ig) { $('igBtn').classList.add('next'); $('igBtnText').textContent = '인스타그램 열고 붙여넣기'; }
     clearTimeout(doneTimer);
-    doneTimer = setTimeout(function () { resetCopyState(); $('dockNote').textContent = ''; }, 9000);
+    doneTimer = setTimeout(resetCopyState, 9000);
   }
   function legacyCopy(text) {
     var ta = document.createElement('textarea');
@@ -291,7 +381,7 @@ textarea.in{resize:vertical;min-height:84px}
     var fb = $('fallback');
     fb.value = copyText; fb.hidden = false; fb.focus(); fb.select();
     try { fb.setSelectionRange(0, copyText.length); } catch (e) { /* 무시 */ }
-    $('dockNote').textContent = '자동 복사가 안 돼요. 위 문구를 길게 눌러 복사하세요.';
+    $('copyNote').textContent = '자동 복사가 안 돼요. 위 문구를 길게 눌러 복사하세요.';
   }
   function doCopy(text, onOk, onFail) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -305,45 +395,85 @@ textarea.in{resize:vertical;min-height:84px}
     doCopy(copyText, markDone, showManual);
   });
 
-  /* 담당자 설정 */
-  var qrTimer = 0, qrObj = null;
-  function buildLink() {
-    var base;
-    try { var u = new URL(window.location.href); base = u.origin + u.pathname; }
-    catch (e) { base = window.location.href.split('?')[0].split('#')[0]; }
-    var p = new URLSearchParams();
-    if (cfg.title && cfg.title !== DEFAULT_TITLE) p.set('title', cfg.title);
-    p.set('tags', cfg.tags.join(','));
-    if (cfg.ig) p.set('ig', cfg.ig);
-    return base + '?' + p.toString();
+  /* 관리자: 링크와 QR (QR 라이브러리는 관리자 화면에서만 불러와요) */
+  var qrState = '', qrQueue = [];
+  function withQr(ok, fail) {
+    if (window.QRCode) { ok(); return; }
+    qrQueue.push([ok, fail]);
+    if (qrState === 'loading') return;
+    qrState = 'loading';
+    var s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+    s.onload = function () { qrState = 'ready'; qrQueue.splice(0).forEach(function (q) { q[0](); }); };
+    s.onerror = function () { qrState = ''; qrQueue.splice(0).forEach(function (q) { q[1](); }); };
+    document.head.appendChild(s);
   }
   function drawQr(text) {
     var box = $('qr');
-    box.textContent = '';
-    try {
-      qrObj = new QRCode(box, { text: text, width: 224, height: 224, colorDark: '#12262B', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
-    } catch (e) {
-      box.textContent = 'QR을 만들지 못했어요. 위 링크를 복사해서 사용하세요.';
-    }
+    box.textContent = 'QR을 만드는 중…';
+    withQr(function () {
+      box.textContent = '';
+      try {
+        new QRCode(box, { text: text, width: 224, height: 224, colorDark: '#12262B', colorLight: '#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+      } catch (e) { box.textContent = 'QR을 만들지 못했어요. 위 링크를 복사해서 사용하세요.'; }
+    }, function () { box.textContent = 'QR을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'; });
+  }
+  function guestBase() {
+    var strip = /\/admin(\.html)?$/;
+    try { var u = new URL(window.location.href); return u.origin + u.pathname.replace(strip, '/'); }
+    catch (e) { return window.location.href.split('?')[0].split('#')[0].replace(strip, '/'); }
+  }
+  function buildLink(c) {
+    var p = new URLSearchParams();
+    if (c.title && c.title !== DEFAULTS.title) p.set('title', c.title);
+    p.set('tags', c.tags.join(','));
+    if (c.ig) p.set('ig', c.ig);
+    return guestBase() + '?' + p.toString();
   }
   function refreshOutputs() {
-    var link = buildLink();
+    var link = buildLink(saved);
     $('outLink').value = link;
-    clearTimeout(qrTimer);
-    qrTimer = setTimeout(function () { drawQr(link); }, 250);
+    drawQr(link);
   }
-  function saveDraft() {
-    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(cfg)); } catch (e) { /* 무시 */ }
+
+  /* 관리자: 저장 */
+  function snap(c) { return JSON.stringify([c.title, c.tags, c.ig]); }
+  function updateSaveState() {
+    var el = $('saveState'), btn = $('btnSave');
+    if (snap(cfg) !== snap(saved)) {
+      el.dataset.s = 'dirty';
+      el.textContent = '저장하지 않은 변경사항이 있어요. 설정 저장을 눌러야 링크와 QR에 반영돼요.';
+      btn.classList.remove('idle');
+    } else if (justSaved) {
+      el.dataset.s = 'saved';
+      el.textContent = '저장했어요 (' + justSaved + '). 아래 링크와 QR을 새 설정으로 바꿨어요.';
+      btn.classList.add('idle');
+    } else {
+      el.dataset.s = 'clean';
+      el.textContent = '저장된 설정이에요.';
+      btn.classList.add('idle');
+    }
   }
   function onAdminInput() {
-    cfg.title = $('fTitle').value.trim().slice(0, 30) || DEFAULT_TITLE;
+    cfg.title = $('fTitle').value.trim().slice(0, 30) || DEFAULTS.title;
     cfg.tags = parseTags($('fTags').value);
     var raw = $('fIg').value.trim();
     cfg.ig = cleanIg(raw);
     $('igErr').textContent = raw && !cfg.ig ? '인스타그램 주소나 @아이디를 확인해 주세요.' : '';
-    render(); refreshOutputs(); saveDraft();
+    render(); updateSaveState();
   }
   ['fTitle', 'fTags', 'fIg'].forEach(function (id) { $(id).addEventListener('input', onAdminInput); });
+  $('btnSave').addEventListener('click', function () {
+    var el = $('saveState');
+    var raw = $('fIg').value.trim();
+    if (raw && !cfg.ig) { el.dataset.s = 'error'; el.textContent = '인스타그램 주소나 @아이디를 확인한 뒤 저장해 주세요.'; return; }
+    if (!cfg.tags.length) { el.dataset.s = 'error'; el.textContent = '해시태그를 한 개 이상 입력한 뒤 저장해 주세요.'; return; }
+    saved = clone(cfg);
+    justSaved = new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(saved)); } catch (e) { /* 저장소를 못 써도 링크와 QR은 만들어져요 */ }
+    refreshOutputs();
+    updateSaveState();
+  });
   $('btnCopyLink').addEventListener('click', function () {
     var b = $('btnCopyLink');
     doCopy($('outLink').value, function () {
@@ -351,19 +481,156 @@ textarea.in{resize:vertical;min-height:84px}
       setTimeout(function () { b.textContent = '링크 복사'; }, 1800);
     }, function () { $('outLink').focus(); $('outLink').select(); });
   });
-
   function fillAdminFields() {
     $('fTitle').value = cfg.title;
     $('fTags').value = cfg.tags.map(function (t) { return '#' + t; }).join(' ');
     $('fIg').value = cfg.ig;
   }
 
-  /* 화면 전환: #admin 이면 담당자 설정을 위에 연다 */
+  /* 관리자 비밀번호 */
+  var unlockedMem = false;
+  function hashPin(pin) {
+    if (!(window.crypto && window.crypto.subtle && window.TextEncoder)) return Promise.reject(new Error('no-crypto'));
+    return window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(PIN_SALT + pin)).then(function (buf) {
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+    });
+  }
+  function activeHash() {
+    try {
+      var o = localStorage.getItem(PIN_KEY);
+      if (o && /^[0-9a-f]{64}$/.test(o)) return o;
+    } catch (e) { /* 무시 */ }
+    return PIN_HASH;
+  }
+  function isUnlocked() {
+    if (unlockedMem) return true;
+    try { return sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) { return false; }
+  }
+  function setUnlocked(v) {
+    unlockedMem = v;
+    try { if (v) sessionStorage.setItem(UNLOCK_KEY, '1'); else sessionStorage.removeItem(UNLOCK_KEY); } catch (e) { /* 무시 */ }
+  }
+  function isLocked() { return !!activeHash() && !isUnlocked(); }
+
+  // 연속으로 5번 틀리면 30초 동안 입력을 막아요
+  function readFail() { try { return JSON.parse(localStorage.getItem(FAIL_KEY) || '{}') || {}; } catch (e) { return {}; } }
+  function writeFail(o) { try { localStorage.setItem(FAIL_KEY, JSON.stringify(o)); } catch (e) { /* 무시 */ } }
+  var coolTimer = 0;
+  function coolLeft() {
+    var f = readFail();
+    return f.until && f.until > Date.now() ? Math.ceil((f.until - Date.now()) / 1000) : 0;
+  }
+  function tickCool() {
+    var left = coolLeft(), msg = $('lockMsg'), inp = $('pinInput');
+    if (left > 0) {
+      msg.textContent = '비밀번호를 여러 번 틀렸어요. ' + left + '초 뒤에 다시 입력해 주세요.';
+      inp.disabled = true; $('btnUnlock').disabled = true;
+      if (!coolTimer) coolTimer = setInterval(tickCool, 500);
+    } else {
+      if (coolTimer) { clearInterval(coolTimer); coolTimer = 0; msg.textContent = ''; }
+      inp.disabled = false; $('btnUnlock').disabled = false;
+    }
+  }
+  function shake(el) {
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+    setTimeout(function () { el.classList.remove('shake'); }, 400);
+  }
+
+  var checking = false;
+  function tryUnlock() {
+    var inp = $('pinInput'), msg = $('lockMsg'), pin = inp.value;
+    if (checking || coolLeft() > 0) return;
+    if (!/^\d{4}$/.test(pin)) { msg.textContent = '숫자 4자리를 입력해 주세요.'; return; }
+    checking = true;
+    hashPin(pin).then(function (h) {
+      checking = false;
+      if (h === activeHash()) {
+        writeFail({}); setUnlocked(true); inp.value = ''; msg.textContent = '';
+        applyMode();
+      } else {
+        var f = readFail(); f.n = (f.n || 0) + 1;
+        if (f.n >= 5) { f.until = Date.now() + 30000; f.n = 0; }
+        writeFail(f);
+        inp.value = '';
+        msg.textContent = '비밀번호가 맞지 않아요.';
+        shake($('lock'));
+        tickCool();
+        try { inp.focus(); } catch (e) { /* 무시 */ }
+      }
+    }, function () {
+      checking = false;
+      msg.textContent = '이 주소에서는 비밀번호 확인을 쓸 수 없어요. https 주소로 접속해 주세요.';
+    });
+  }
+  $('lockForm').addEventListener('submit', function (e) { e.preventDefault(); tryUnlock(); });
+  $('pinInput').addEventListener('input', function () {
+    this.value = this.value.replace(/\D/g, '').slice(0, 4);
+    if (this.value.length === 4) tryUnlock();
+  });
+  ['pinCur', 'pinNew', 'pinNew2'].forEach(function (id) {
+    $(id).addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 4); });
+  });
+
+  function clearPinFields() { ['pinCur', 'pinNew', 'pinNew2'].forEach(function (id) { $(id).value = ''; }); }
+  function preparePinCard() {
+    var has = !!activeHash();
+    $('curWrap').hidden = !has;
+    $('pinBox').open = !has;
+    $('pinState').dataset.s = 'clean';
+    $('pinState').textContent = has ? '' : '비밀번호가 아직 없어요. 숫자 4자리로 만들어 주세요.';
+    $('pinShare').hidden = true;
+    clearPinFields();
+  }
+  $('btnPinChange').addEventListener('click', function () {
+    var st = $('pinState'), cur = $('pinCur').value, n1 = $('pinNew').value, n2 = $('pinNew2').value;
+    var has = !!activeHash();
+    function fail(m) { st.dataset.s = 'error'; st.textContent = m; }
+    if (has && !/^\d{4}$/.test(cur)) { fail('현재 비밀번호 4자리를 입력해 주세요.'); return; }
+    if (!/^\d{4}$/.test(n1)) { fail('새 비밀번호는 숫자 4자리로 입력해 주세요.'); return; }
+    if (n1 !== n2) { fail('새 비밀번호 확인이 달라요. 다시 입력해 주세요.'); return; }
+    var check = has ? hashPin(cur).then(function (h) { if (h !== activeHash()) throw new Error('wrong'); }) : Promise.resolve();
+    check.then(function () { return hashPin(n1); }).then(function (nh) {
+      try { localStorage.setItem(PIN_KEY, nh); }
+      catch (e) { fail('이 기기에 저장하지 못했어요. 브라우저 저장소 설정을 확인해 주세요.'); return; }
+      st.dataset.s = 'saved';
+      st.textContent = '비밀번호를 바꿨어요. 이 기기에서는 지금부터 새 비밀번호로 들어가요.';
+      $('pinHashOut').value = nh;
+      $('pinShare').hidden = false;
+      $('curWrap').hidden = false;
+      clearPinFields();
+    }).catch(function (e) {
+      fail(e && e.message === 'wrong' ? '현재 비밀번호가 맞지 않아요.' : '비밀번호를 바꾸지 못했어요. https 주소에서 다시 시도해 주세요.');
+    });
+  });
+  $('btnCopyHash').addEventListener('click', function () {
+    var b = $('btnCopyHash');
+    doCopy($('pinHashOut').value, function () {
+      b.textContent = '복사 완료';
+      setTimeout(function () { b.textContent = '값 복사'; }, 1800);
+    }, function () { $('pinHashOut').focus(); $('pinHashOut').select(); });
+  });
+  $('btnLock').addEventListener('click', function () { setUnlocked(false); applyMode(); });
+
+  /* 화면 전환: 관리자 주소(admin.html, 또는 주소 끝 #admin)에서만 열리고, 비밀번호를 맞춰야 설정이 보여요 */
+  function setView(v) {
+    $('lock').hidden = v !== 'lock';
+    $('admin').hidden = v !== 'admin';
+    $('guestView').hidden = v === 'lock';
+    $('guestFoot').hidden = v === 'guest';
+  }
   function applyMode() {
-    var admin = window.location.hash === '#admin';
-    $('admin').hidden = !admin;
-    $('guestFoot').hidden = !admin;
-    if (admin) { fillAdminFields(); refreshOutputs(); }
+    var admin = isAdmin();
+    $('guestLink').setAttribute('href', forcedAdmin ? './' : '#guest');
+    document.title = admin ? TITLE_ADMIN : TITLE_GUEST;
+    if (!admin) { setView('guest'); return; }
+    if (isLocked()) {
+      setView('lock');
+      tickCool();
+      setTimeout(function () { try { $('pinInput').focus(); } catch (e) { /* 무시 */ } }, 50);
+      return;
+    }
+    setView('admin');
+    fillAdminFields(); updateSaveState(); refreshOutputs(); preparePinCard();
   }
   window.addEventListener('hashchange', applyMode);
 
@@ -371,3 +638,5 @@ textarea.in{resize:vertical;min-height:84px}
   applyMode();
 })();
 </script>
+</body>
+</html>
