@@ -7,6 +7,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="제주시농협 해시태그 빠른 복사">
 <meta property="og:description" content="지정 해시태그를 한 번에 복사하고 인스타그램으로 이동하세요.">
+<script src="config.js"></script>
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -112,6 +113,7 @@ textarea.in{resize:vertical;min-height:84px}
 .hero h1 span{display:block}
 .hero h1 i{font-style:normal;display:inline-grid;place-items:center;width:1.25em;height:1.25em;margin:.12em 0;border-radius:50%;background:#FF8A1F;color:#fff;font-size:.78em;line-height:1;text-shadow:none;box-shadow:0 2px 0 rgba(160,70,0,.35)}
 #guestView{display:grid;gap:16px;min-width:0}
+#guestView[aria-busy=true] #title,#guestView[aria-busy=true] #tagList,#guestView[aria-busy=true] #handle{opacity:.3}
 #lock{gap:14px}
 .pin{width:100%;text-align:center;letter-spacing:.7em;padding:12px 0 12px .7em;font-size:30px;font-weight:700;border:2px solid var(--line);border-radius:14px;background:var(--bg)}
 .pin:focus-visible{border-color:var(--ink);outline:none}
@@ -169,7 +171,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     </div>
     <div class="card">
       <h2>참가자용 링크와 QR</h2>
-      <p class="hint">마지막으로 저장한 설정 기준이에요. 설정을 바꾸면 이 링크와 QR을 새로 배포해 주세요.</p>
+      <p class="hint" id="linkHint">마지막으로 저장한 설정 기준이에요. 설정을 바꾸면 이 링크와 QR을 새로 배포해 주세요.</p>
       <div class="linkrow">
         <input id="outLink" type="text" readonly aria-label="참가자용 링크">
         <button id="btnCopyLink" class="btn" type="button">링크 복사</button>
@@ -349,11 +351,34 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
 
   /* 관리자 비밀번호(숫자 4자리)를 SHA-256으로 바꾼 값이에요. 비밀번호를 바꾸려면 관리자 화면의 '비밀번호 변경'에서 만든 값으로 교체하세요.
      값을 빈 문자열('')로 두면 잠금 없이 열리고, 새 비밀번호를 만들라고 안내해요. 파일을 볼 수 있는 사람에게는 알아낼 수 있는 가벼운 잠금이에요. */
-  var PIN_HASH = '136d5b916d1d28e273e2c9bc4b01e44c81dd06050218bd9024db9ceea3db25b1';
+  var PIN_HASH = '143ec65292b0ee7b51a95bcddc4768b09807c7d302f1a1bf6c7b114bb8a77765';
   var PIN_SALT = 'jejusinonghyup-hashtag-admin:v1:';
   var PIN_KEY = 'hashtag-quick-copy.pin.v1';
   var UNLOCK_KEY = 'hashtag-quick-copy.unlocked.v1';
   var FAIL_KEY = 'hashtag-quick-copy.fail.v1';
+
+  /* 서버(구글 Apps Script) 연결: config.js에 웹 앱 주소가 있으면 설정과 비밀번호를 서버에 저장해서
+     모든 기기에 바로 반영돼요. 주소가 비어 있으면 위의 기본값과 이 기기 저장 방식으로 동작해요. */
+  var API = String(window.HASHTAG_API || '').trim();
+  var REMOTE = /^https:\/\/script\.google(usercontent)?\.com\//.test(API);
+  var REMOTE_KEY = 'hashtag-quick-copy.remote.v1';
+  var PINMEM_KEY = 'hashtag-quick-copy.pinmem.v1';
+  var adminPin = '';
+  try { adminPin = sessionStorage.getItem(PINMEM_KEY) || ''; } catch (e) { adminPin = ''; }
+  function setAdminPin(v) {
+    adminPin = v || '';
+    try { if (adminPin) sessionStorage.setItem(PINMEM_KEY, adminPin); else sessionStorage.removeItem(PINMEM_KEY); } catch (e) { /* 무시 */ }
+  }
+  function withTimeout(url, opt) {
+    var ctl = window.AbortController ? new AbortController() : null;
+    var t = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
+    if (ctl) opt.signal = ctl.signal;
+    return fetch(url, opt).then(function (r) { clearTimeout(t); return r.json(); }, function (e) { clearTimeout(t); throw e; });
+  }
+  function apiGet() { return withTimeout(API + (API.indexOf('?') < 0 ? '?' : '&') + 'action=get&t=' + Date.now(), { method: 'GET', cache: 'no-store' }); }
+  function apiPost(body) {
+    return withTimeout(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+  }
 
   var $ = function (id) { return document.getElementById(id); };
   var forcedAdmin = document.documentElement.getAttribute('data-mode') === 'admin';
@@ -394,8 +419,16 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
 
   /* 설정 읽기: 주소의 값 → 이 기기에 저장한 설정 → 기본값 */
   var cfg = clone(DEFAULTS);
+  var remoteKnown = false;
   (function init() {
     var q = new URLSearchParams(window.location.search);
+    if (REMOTE) {   // 서버 설정이 기준이라 주소에 담긴 값은 쓰지 않아요. 지난번에 받은 값을 먼저 보여줘요.
+      try {
+        var rc = JSON.parse(localStorage.getItem(REMOTE_KEY) || 'null');
+        if (rc && Array.isArray(rc.tags)) { cfg.title = String(rc.title == null ? '' : rc.title).slice(0, 30); cfg.tags = parseTags(rc.tags.join(' ')); cfg.ig = cleanIg(rc.ig); remoteKnown = true; }
+      } catch (e) { /* 무시 */ }
+      return;
+    }
     if (q.has('tags') || q.has('ig') || q.has('title')) {
       cfg.title = (q.has('title') ? q.get('title') : DEFAULTS.title).slice(0, 30);   // title= 처럼 비워두면 제목 없음
       cfg.tags = parseTags((q.get('tags') || '').replace(/,/g, ' '));
@@ -540,6 +573,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     catch (e) { return window.location.href.split('?')[0].split('#')[0].replace(strip, '/'); }
   }
   function buildLink(c) {
+    if (REMOTE) return guestBase();   // 설정은 서버에 있어서 링크는 한 번만 배포하면 돼요
     var p = new URLSearchParams();
     if (c.title !== DEFAULTS.title) p.set('title', c.title);   // 비워둔 제목도 링크에 담아요
     p.set('tags', c.tags.join(','));
@@ -558,11 +592,11 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     var el = $('saveState'), btn = $('btnSave');
     if (snap(cfg) !== snap(saved)) {
       el.dataset.s = 'dirty';
-      el.textContent = '저장하지 않은 변경사항이 있어요. 설정 저장을 눌러야 링크와 QR에 반영돼요.';
+      el.textContent = REMOTE ? '저장하지 않은 변경사항이 있어요. 설정 저장을 눌러야 참가자 화면에 반영돼요.' : '저장하지 않은 변경사항이 있어요. 설정 저장을 눌러야 링크와 QR에 반영돼요.';
       btn.classList.remove('idle');
     } else if (justSaved) {
       el.dataset.s = 'saved';
-      el.textContent = '저장했어요 (' + justSaved + '). 아래 링크와 QR을 새 설정으로 바꿨어요.';
+      el.textContent = REMOTE ? '저장했어요 (' + justSaved + '). 참가자 화면에 바로 반영돼요. 링크와 QR은 그대로 쓰세요.' : '저장했어요 (' + justSaved + '). 아래 링크와 QR을 새 설정으로 바꿨어요.';
       btn.classList.add('idle');
     } else {
       el.dataset.s = 'clean';
@@ -584,6 +618,26 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     var raw = $('fIg').value.trim();
     if (raw && !cfg.ig) { el.dataset.s = 'error'; el.textContent = '인스타그램 주소나 @아이디를 확인한 뒤 저장해 주세요.'; return; }
     if (!cfg.tags.length) { el.dataset.s = 'error'; el.textContent = '해시태그를 한 개 이상 입력한 뒤 저장해 주세요.'; return; }
+    if (REMOTE) {
+      var sb = $('btnSave'); sb.disabled = true; el.dataset.s = 'dirty'; el.textContent = '서버에 저장하는 중이에요…';
+      apiPost({ action: 'save', pin: adminPin, title: cfg.title, tags: cfg.tags, ig: cfg.ig }).then(function (r) {
+        sb.disabled = false;
+        if (r && r.ok) {
+          saved = clone(cfg);
+          justSaved = new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+          try { localStorage.setItem(REMOTE_KEY, JSON.stringify(saved)); } catch (e) { /* 무시 */ }
+          refreshOutputs(); updateSaveState();
+        } else if (r && (r.error === 'wrong' || r.error === 'locked')) {
+          setUnlocked(false); setAdminPin(''); applyMode();
+        } else {
+          el.dataset.s = 'error';
+          el.textContent = r && r.error === 'bad-ig' ? '인스타그램 주소를 확인해 주세요.' : '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.';
+        }
+      }, function () {
+        sb.disabled = false; el.dataset.s = 'error'; el.textContent = '서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.';
+      });
+      return;
+    }
     saved = clone(cfg);
     justSaved = new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
     try { localStorage.setItem(DRAFT_KEY, JSON.stringify(saved)); } catch (e) { /* 저장소를 못 써도 링크와 QR은 만들어져요 */ }
@@ -619,6 +673,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     return PIN_HASH;
   }
   function isUnlocked() {
+    if (REMOTE && !adminPin) return false;
     if (unlockedMem) return true;
     try { return sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) { return false; }
   }
@@ -626,7 +681,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     unlockedMem = v;
     try { if (v) sessionStorage.setItem(UNLOCK_KEY, '1'); else sessionStorage.removeItem(UNLOCK_KEY); } catch (e) { /* 무시 */ }
   }
-  function isLocked() { return !!activeHash() && !isUnlocked(); }
+  function isLocked() { return (REMOTE || !!activeHash()) && !isUnlocked(); }
 
   // 연속으로 5번 틀리면 30초 동안 입력을 막아요
   function readFail() { try { return JSON.parse(localStorage.getItem(FAIL_KEY) || '{}') || {}; } catch (e) { return {}; } }
@@ -658,6 +713,21 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     if (checking || coolLeft() > 0) return;
     if (!/^\d{4}$/.test(pin)) { msg.textContent = '숫자 4자리를 입력해 주세요.'; return; }
     checking = true;
+    if (REMOTE) {
+      msg.textContent = '확인하는 중…';
+      apiPost({ action: 'verify', pin: pin }).then(function (r) {
+        checking = false;
+        if (r && r.ok) { writeFail({}); setAdminPin(pin); setUnlocked(true); inp.value = ''; msg.textContent = ''; applyMode(); return; }
+        inp.value = '';
+        if (r && r.error === 'locked') {
+          writeFail({ until: Date.now() + (r.wait || 30) * 1000 }); tickCool();
+        } else {
+          msg.textContent = '비밀번호가 맞지 않아요.'; shake($('lock'));
+          try { inp.focus(); } catch (e) { /* 무시 */ }
+        }
+      }, function () { checking = false; msg.textContent = '서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'; });
+      return;
+    }
     hashPin(pin).then(function (h) {
       checking = false;
       if (h === activeHash()) {
@@ -689,7 +759,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
 
   function clearPinFields() { ['pinCur', 'pinNew', 'pinNew2'].forEach(function (id) { $(id).value = ''; }); }
   function preparePinCard() {
-    var has = !!activeHash();
+    var has = REMOTE || !!activeHash();
     $('curWrap').hidden = !has;
     $('pinBox').open = !has;
     $('pinState').dataset.s = 'clean';
@@ -699,11 +769,23 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
   }
   $('btnPinChange').addEventListener('click', function () {
     var st = $('pinState'), cur = $('pinCur').value, n1 = $('pinNew').value, n2 = $('pinNew2').value;
-    var has = !!activeHash();
+    var has = REMOTE || !!activeHash();
     function fail(m) { st.dataset.s = 'error'; st.textContent = m; }
     if (has && !/^\d{4}$/.test(cur)) { fail('현재 비밀번호 4자리를 입력해 주세요.'); return; }
     if (!/^\d{4}$/.test(n1)) { fail('새 비밀번호는 숫자 4자리로 입력해 주세요.'); return; }
     if (n1 !== n2) { fail('새 비밀번호 확인이 달라요. 다시 입력해 주세요.'); return; }
+    if (REMOTE) {
+      var cb = $('btnPinChange'); cb.disabled = true; st.dataset.s = 'dirty'; st.textContent = '서버에 저장하는 중이에요…';
+      apiPost({ action: 'changePin', pin: cur, newPin: n1 }).then(function (r) {
+        cb.disabled = false;
+        if (r && r.ok) {
+          setAdminPin(n1); clearPinFields();
+          st.dataset.s = 'saved'; st.textContent = '비밀번호를 바꿨어요. 모든 기기에서 새 비밀번호로 들어가요.';
+        } else if (r && r.error === 'locked') { fail('여러 번 틀려서 잠시 막혔어요. ' + (r.wait || 30) + '초 뒤에 다시 해주세요.'); }
+        else { fail('현재 비밀번호가 맞지 않아요.'); }
+      }, function () { cb.disabled = false; fail('서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.'); });
+      return;
+    }
     var check = has ? hashPin(cur).then(function (h) { if (h !== activeHash()) throw new Error('wrong'); }) : Promise.resolve();
     check.then(function () { return hashPin(n1); }).then(function (nh) {
       try { localStorage.setItem(PIN_KEY, nh); }
@@ -725,7 +807,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
       setTimeout(function () { b.textContent = '값 복사'; }, 1800);
     }, function () { $('pinHashOut').focus(); $('pinHashOut').select(); });
   });
-  $('btnLock').addEventListener('click', function () { setUnlocked(false); applyMode(); });
+  $('btnLock').addEventListener('click', function () { setUnlocked(false); setAdminPin(''); applyMode(); });
 
   /* 화면 전환: 관리자 주소(admin.html, 또는 주소 끝 #admin)에서만 열리고, 비밀번호를 맞춰야 설정이 보여요 */
   function setView(v) {
@@ -747,6 +829,7 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     }
     setView('admin');
     fillAdminFields(); updateSaveState(); refreshOutputs(); preparePinCard();
+    if (REMOTE) loadRemote();
   }
   window.addEventListener('hashchange', applyMode);
 
@@ -764,6 +847,9 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     });
   }
   checkFont();
+  if (REMOTE) {
+    var lh = $('linkHint'); if (lh) lh.textContent = '이 링크와 QR은 한 번만 배포하면 돼요. 설정을 바꿔도 같은 링크·QR에 바로 반영돼요.';
+  }
 
   /* 배경 사진: 같은 폴더에 hero.jpg(또는 hero.png, hero.webp)를 넣으면 그대로 보여줘요 (1280x720 권장).
      그림 안에 제목 글씨가 이미 있으면 관리자 화면의 '제목'을 비워두세요. */
@@ -778,8 +864,29 @@ details summary{cursor:pointer;font-size:15px;font-weight:700;color:var(--ink-2)
     img.src = names[0];
   })();
 
+  /* 서버에서 최신 설정 받기 (저장하지 않은 수정이 있으면 덮어쓰지 않아요) */
+  function loadRemote() {
+    if (!REMOTE) return;
+    apiGet().then(function (r) {
+      if (!r || !r.ok) throw new Error('bad');
+      var fresh = r.configured ? { title: String(r.title == null ? '' : r.title).slice(0, 30), tags: parseTags((r.tags || []).join(' ')), ig: cleanIg(r.ig) } : clone(DEFAULTS);
+      if (snap(cfg) === snap(saved)) {
+        cfg = clone(fresh); saved = clone(fresh);
+        try { localStorage.setItem(REMOTE_KEY, JSON.stringify(fresh)); } catch (e) { /* 무시 */ }
+        render();
+        if (isAdmin() && !isLocked()) { fillAdminFields(); updateSaveState(); refreshOutputs(); }
+      }
+      remoteKnown = true; $('guestView').removeAttribute('aria-busy'); $('copyBtn').disabled = !cfg.tags.length;
+    }).catch(function () {
+      remoteKnown = true; $('guestView').removeAttribute('aria-busy'); $('copyBtn').disabled = !cfg.tags.length;
+      if (isAdmin() && !isLocked()) { var el = $('saveState'); el.dataset.s = 'error'; el.textContent = '서버에서 설정을 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'; }
+    });
+  }
+
   render();
+  if (REMOTE && !remoteKnown) { $('guestView').setAttribute('aria-busy', 'true'); $('copyBtn').disabled = true; }
   applyMode();
+  if (REMOTE) loadRemote();
 })();
 </script>
 </body>
